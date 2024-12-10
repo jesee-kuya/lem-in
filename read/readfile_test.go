@@ -21,6 +21,7 @@ func TestReadFile(t *testing.T) {
 			t.Errorf("Error creating file %v", tc.filepath)
 		}
 		content, _ := ReadFile(tc.filepath)
+		defer os.Remove(tc.filepath)
 
 		if content != tc.output {
 			t.Errorf("Expected\ncontent: %v but got\ncontent %v", tc.output, content)
