@@ -5,7 +5,9 @@ import (
 	"testing"
 )
 
-var content1 = `##start
+var (
+	content1 = `3
+##start
 1 23 3
 2 16 7
 #comment
@@ -30,13 +32,40 @@ var content1 = `##start
 7-4
 6-5`
 
-var TestCases = []struct {
-	name    string
-	content string
-	arr     [][]int
-}{
-	{"Test1", content1, [][]int{{1, 3, 4, 0}, {1, 2, 4, 0}, {1, 2, 7, 4, 0}, {1, 2, 7, 6, 0}, {1, 3, 5, 6, 0}, {1, 3, 5, 2, 4, 0}, {1, 3, 5, 2, 7, 4, 0}, {1, 3, 5, 2, 7, 6, 0}}},
-}
+	content2 = `3
+##start
+0 1 0
+##end
+1 5 0
+2 9 0
+3 13 0
+0-2
+2-3
+3-1`
+
+	content3 = `3
+2 5 0
+##start
+0 1 2
+##end
+1 9 2
+3 5 4
+0-2
+0-3
+2-1
+3-1
+2-3`
+
+	TestCases = []struct {
+		name    string
+		content string
+		arr     [][]int
+	}{
+		{"Test1", content1, [][]int{{1, 3, 4, 0}, {1, 2, 4, 0}, {1, 2, 7, 4, 0}, {1, 2, 7, 6, 0}, {1, 3, 5, 6, 0}, {1, 3, 5, 2, 4, 0}, {1, 3, 5, 2, 7, 4, 0}, {1, 3, 5, 2, 7, 6, 0}}},
+		{"Test2", content2, [][]int{{0, 2, 3, 1}}},
+		{"Test3", content3, [][]int{{0, 3, 1}, {0, 2, 1}}},
+	}
+)
 
 func TestRoute(t *testing.T) {
 	for _, tc := range TestCases {
