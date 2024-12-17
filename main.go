@@ -4,19 +4,32 @@ import (
 	"fmt"
 	"os"
 
+	"lem-in/colony"
 	"lem-in/read"
 )
 
 func main() {
-	args := os.Args[1:]
-	if len(args) != 1 {
-		fmt.Println("Usage: go run main.go [input_file]")
-		os.Exit(1)
+	if len(os.Args) != 2 {
+		fmt.Println("Usage: go run . [INPUT-FILE]")
+		return
 	}
-	// process the file contents
-	file, err := read.ReadFile(args[0])
+
+	// Read input file
+	input, err := read.ReadFile(os.Args[1])
 	if err != nil {
-		fmt.Println("ERROR", err)
+		fmt.Println("Error reading file:", err)
+		return
 	}
-	fmt.Println(file)
+
+	// Find all routes
+	routes, err := colony.Route(input)
+	if err != nil {
+		fmt.Println("Error finding paths:", err)
+		return
+	}
+
+	fmt.Println("Routes:")
+	for _, route := range routes {
+		fmt.Println(route)
+	}
 }
