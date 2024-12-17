@@ -14,18 +14,28 @@ type Graph map[int][]int
 func parseGraph(input string) (Graph, int, int, error) {
 	lines := strings.Split(input, "\n")
 	graph := make(Graph)
-
-	// Indicates that the startRoom and endRoom are not yet set.
 	startRoom, endRoom := -1, -1
+	isStart, isEnd := false, false
 
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
 
 		if line == "" || strings.HasPrefix(line, "#") {
-			continue
+			if line == "##start" {
+				isStart = true
+				isEnd = false
+				continue
+			}
+			if line == "##end" {
+				isEnd = true
+				isStart = false
+				continue
+			}
+			if strings.HasPrefix(line, "#") {
+				continue
+			}
 		}
 
-		// Check if line defines a room or tunnel.
 		switch {
 		case strings.Contains(line, "-"):
 			parts := strings.Split(line, "-")
@@ -42,8 +52,7 @@ func parseGraph(input string) (Graph, int, int, error) {
 
 			graph[from] = append(graph[from], to)
 			graph[to] = append(graph[to], from)
-		case strings.HasPrefix(line, "##start"), strings.HasPrefix(line, "##end"):
-			continue
+
 		default:
 			parts := strings.Split(line, " ")
 			if len(parts) == 3 {
@@ -52,11 +61,12 @@ func parseGraph(input string) (Graph, int, int, error) {
 					continue
 				}
 
-				// Check if this is start or end room based on previous lines.
-				if startRoom == -1 {
+				if isStart {
 					startRoom = room
-				} else if endRoom == -1 {
+					isStart = false
+				} else if isEnd {
 					endRoom = room
+					isEnd = false
 				}
 			}
 		}
@@ -71,50 +81,91 @@ func parseGraph(input string) (Graph, int, int, error) {
 
 // Route finds all routes between start and end.
 func Route(input string) ([][]int, error) {
-	// Parse the input into a graph and start/end rooms
 	graph, start, end, err := parseGraph(input)
 	if err != nil {
 		return nil, err
 	}
 
-	// Check if start and end are valid
 	if start == -1 || end == -1 {
 		return nil, errors.New("invalid start or end room")
 	}
 
-	visited := make(map[int]bool)
 	var paths [][]int
+	visited := make(map[int]bool)
+	currentPath := []int{start}
+	visited[start] = true
 
-	// Perform depth-first search
-	dfs(graph, start, end, visited, []int{}, &paths)
+	findPaths(graph, start, end, visited, currentPath, &paths)
 
 	if len(paths) == 0 {
 		return nil, errors.New("no paths found")
 	}
 
-	return paths, nil
+	return filterOptimalPaths(paths), nil
 }
 
-// dfs performs depth-first search.
-func dfs(graph Graph, current, end int, visited map[int]bool, path []int, paths *[][]int) {
-	// Mark current room as visited.
-	visited[current] = true
-	path = append(path, current)
-
+func findPaths(graph Graph, current, end int, visited map[int]bool, currentPath []int, paths *[][]int) {
 	if current == end {
-		// Create a copy of the path and add to paths if we reach the end room.
-		pathCopy := make([]int, len(path))
-		copy(pathCopy, path)
+		pathCopy := make([]int, len(currentPath))
+		copy(pathCopy, currentPath)
 		*paths = append(*paths, pathCopy)
-		visited[current] = false
 		return
 	}
 
-	// Explore connected rooms.
-	for _, neighbor := range graph[current] {
-		if !visited[neighbor] {
-			dfs(graph, neighbor, end, visited, path, paths)
+	for _, next := range graph[current] {
+		if !visited[next] {
+			visited[next] = true
+			currentPath = append(currentPath, next)
+
+			findPaths(graph, next, end, visited, currentPath, paths)
+
+			currentPath = currentPath[:len(currentPath)-1]
+			visited[next] = false
 		}
 	}
-	visited[current] = false
+}
+
+func filterOptimalPaths(paths [][]int) [][]int {
+	if len(paths) == 0 {
+		return paths
+	}
+
+	// Create a map to store unique paths
+	uniquePaths := make(map[string][]int)
+
+	// Filter paths that don't lead to cycles or unnecessary detours
+	for _, path := range paths {
+		key := fmt.Sprintf("%v", path)
+		isOptimal := true
+
+		// Check if this path is optimal
+		for _, otherPath := range paths {
+			if len(otherPath) < len(path) {
+				// Check if this is a subpath
+				isSubpath := true
+				for i := range otherPath {
+					if i >= len(path) || path[i] != otherPath[i] {
+						isSubpath = false
+						break
+					}
+				}
+				if isSubpath {
+					isOptimal = false
+					break
+				}
+			}
+		}
+
+		if isOptimal {
+			uniquePaths[key] = path
+		}
+	}
+
+	// Convert back to slice
+	result := make([][]int, 0, len(uniquePaths))
+	for _, path := range uniquePaths {
+		result = append(result, path)
+	}
+
+	return result
 }
