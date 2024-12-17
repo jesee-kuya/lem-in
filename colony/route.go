@@ -66,3 +66,23 @@ func ParseGraph(input string) (Graph, int, int, error) {
 	}
 	return graph, startRoom, endRoom, nil
 }
+
+// Route finds all paths between start and end.
+func Route(graph Graph, start, end int) ([][]int, error) {
+	if start == -1 || end == -1 {
+		return nil, errors.New("invalid start or end room")
+	}
+
+	// Used to track visited rooms to prevent repetition.
+	visited := make(map[int]bool)
+	var paths [][]int
+
+	// Start depth-first search.
+	dfs(graph, start, end, visited, []int{}, &paths)
+
+	if len(paths) == 0 {
+		return nil, errors.New("no paths found")
+	}
+
+	return paths, nil
+}
