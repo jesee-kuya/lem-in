@@ -10,8 +10,8 @@ import (
 // Graph represents the ant colony.
 type Graph map[int][]int
 
-// ParseGraph converts input into an adjacency list representation.
-func ParseGraph(input string) (Graph, int, int, error) {
+// parseGraph converts input into an adjacency list representation.
+func parseGraph(input string) (Graph, int, int, error) {
 	lines := strings.Split(input, "\n")
 	graph := make(Graph)
 
@@ -65,20 +65,27 @@ func ParseGraph(input string) (Graph, int, int, error) {
 	if startRoom == -1 || endRoom == -1 {
 		return nil, -1, -1, errors.New("start or end room not found")
 	}
+
 	return graph, startRoom, endRoom, nil
 }
 
 // Route finds all routes between start and end.
-func Route(graph Graph, start, end int) ([][]int, error) {
+func Route(input string) ([][]int, error) {
+	// Parse the input into a graph and start/end rooms
+	graph, start, end, err := parseGraph(input)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if start and end are valid
 	if start == -1 || end == -1 {
 		return nil, errors.New("invalid start or end room")
 	}
 
-	// Used to track visited rooms to prevent repetition.
 	visited := make(map[int]bool)
 	var paths [][]int
 
-	// Start depth-first search.
+	// Perform depth-first search
 	dfs(graph, start, end, visited, []int{}, &paths)
 
 	if len(paths) == 0 {
