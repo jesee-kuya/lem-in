@@ -14,8 +14,9 @@ type Graph map[int][]int
 func ParseGraph(input string) (Graph, int, int, error) {
 	lines := strings.Split(input, "\n")
 	graph := make(Graph)
-	startRoom := -1
-	endRoom := -1
+
+	// Indicates that the startRoom and endRoom are not yet set.
+	startRoom, endRoom := -1, -1
 
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
