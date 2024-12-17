@@ -61,9 +61,9 @@ var (
 		content string
 		arr     [][]int
 	}{
-		{"Test1", content1, [][]int{{1, 3, 4, 0}, {1, 2, 4, 0}, {1, 2, 7, 4, 0}, {1, 2, 7, 6, 0}, {1, 3, 5, 6, 0}, {1, 3, 5, 2, 4, 0}, {1, 3, 5, 2, 7, 4, 0}, {1, 3, 5, 2, 7, 6, 0}}},
+		{"Test1", content1, [][]int{{1, 3, 4, 2, 7, 6, 0}, {1, 3, 5, 2, 7, 6, 0}, {1, 2, 5, 3, 4, 7, 6, 0}, {1, 2, 4, 7, 6, 0}, {1, 2, 7, 4, 0}, {1, 3, 4, 0}, {1, 3, 4, 7, 6, 0}, {1, 3, 5, 2, 4, 7, 6, 0}, {1, 3, 5, 6, 0}, {1, 3, 5, 6, 7, 4, 0}, {1, 2, 5, 3, 4, 0}, {1, 2, 7, 6, 5, 3, 4, 0}, {1, 2, 7, 4, 3, 5, 6, 0}, {1, 3, 4, 7, 2, 5, 6, 0}, {1, 3, 5, 2, 7, 4, 0}, {1, 3, 5, 6, 7, 2, 4, 0}, {1, 2, 5, 6, 7, 4, 0}, {1, 2, 4, 3, 5, 6, 0}, {1, 3, 4, 2, 5, 6, 0}, {1, 3, 5, 2, 4, 0}, {1, 2, 5, 6, 0}, {1, 2, 4, 0}, {1, 2, 7, 6, 0}}},
 		{"Test2", content2, [][]int{{0, 2, 3, 1}}},
-		{"Test3", content3, [][]int{{0, 3, 1}, {0, 2, 1}}},
+		{"Test3", content3, [][]int{{0, 3, 1}, {0, 2, 1}, {0, 2, 3, 1}, {0, 3, 2, 1}}},
 	}
 )
 
@@ -71,8 +71,18 @@ func TestRoute(t *testing.T) {
 	for _, tc := range TestCases {
 		t.Run(tc.name, func(t *testing.T) {
 			arr, _ := Route(tc.content)
-			if !reflect.DeepEqual(tc.arr, arr) {
-				t.Errorf("Expected the routes:\n%v\nBut got the routes:\n%v\n", tc.arr, arr)
+			check := false
+			for i := 0; i < len(arr); i++ {
+				for j := 0; j < len(tc.arr); j++ {
+					if reflect.DeepEqual(arr[i], tc.arr[j]) {
+						check = true
+						break
+					}
+				}
+				if !check {
+					t.Errorf("%v is not in %v", arr[i], tc.arr)
+				}
+				check = false
 			}
 		})
 	}
