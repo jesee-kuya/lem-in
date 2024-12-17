@@ -21,15 +21,8 @@ func main() {
 		return
 	}
 
-	// Parse graph
-	graph, start, end, err := colony.ParseGraph(input)
-	if err != nil {
-		fmt.Println("Error parsing graph:", err)
-		return
-	}
-
 	// Find all routes
-	routes, err := colony.Route(graph, start, end)
+	routes, err := colony.Route(input)
 	if err != nil {
 		fmt.Println("Error finding paths:", err)
 		return
