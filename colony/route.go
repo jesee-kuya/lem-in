@@ -86,3 +86,27 @@ func Route(graph Graph, start, end int) ([][]int, error) {
 
 	return paths, nil
 }
+
+// dfs performs depth-first search.
+func dfs(graph Graph, current, end int, visited map[int]bool, path []int, paths *[][]int) {
+	// Mark current room as visited.
+	visited[current] = true
+	path = append(path, current)
+
+	if current == end {
+		// Create a copy of the path and add to paths if we reach the end room.
+		pathCopy := make([]int, len(path))
+		copy(pathCopy, path)
+		*paths = append(*paths, pathCopy)
+		visited[current] = false
+		return
+	}
+
+	// Explore connected rooms.
+	for _, neighbor := range graph[current] {
+		if !visited[neighbor] {
+			dfs(graph, neighbor, end, visited, path, paths)
+		}
+	}
+	visited[current] = false
+}
