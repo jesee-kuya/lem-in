@@ -1,11 +1,11 @@
 package colony
 
 func Clash(paths [][]int) [][]int {
-	var routes [][]int
 	if len(paths) <= 1 {
 		return paths
 	}
 
+	routes := FilterOptimalPaths(paths)
 	// sort routes by length (Dijkstra's Algorithm)
 	sortRoutes(routes)
 
@@ -21,7 +21,7 @@ func Clash(paths [][]int) [][]int {
 }
 
 func sortRoutes(routes [][]int) {
-	for i := 0; i < len(routes)-1; i++ {
+	for i := 0; i < len(routes); i++ {
 		for j := i + 1; j < len(routes); j++ {
 			if len(routes[i]) > len(routes[j]) {
 				routes[i], routes[j] = routes[j], routes[i]

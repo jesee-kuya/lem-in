@@ -95,16 +95,16 @@ func Route(input string) ([][]int, error) {
 	currentPath := []int{start}
 	visited[start] = true
 
-	findPaths(graph, start, end, visited, currentPath, &paths)
+	FindPaths(graph, start, end, visited, currentPath, &paths)
 
 	if len(paths) == 0 {
 		return nil, errors.New("no paths found")
 	}
 
-	return filterOptimalPaths(paths), nil
+	return FilterOptimalPaths(paths), nil
 }
 
-func findPaths(graph Graph, current, end int, visited map[int]bool, currentPath []int, paths *[][]int) {
+func FindPaths(graph Graph, current, end int, visited map[int]bool, currentPath []int, paths *[][]int) {
 	if current == end {
 		pathCopy := make([]int, len(currentPath))
 		copy(pathCopy, currentPath)
@@ -117,7 +117,7 @@ func findPaths(graph Graph, current, end int, visited map[int]bool, currentPath 
 			visited[next] = true
 			currentPath = append(currentPath, next)
 
-			findPaths(graph, next, end, visited, currentPath, paths)
+			FindPaths(graph, next, end, visited, currentPath, paths)
 
 			currentPath = currentPath[:len(currentPath)-1]
 			visited[next] = false
@@ -125,7 +125,7 @@ func findPaths(graph Graph, current, end int, visited map[int]bool, currentPath 
 	}
 }
 
-func filterOptimalPaths(paths [][]int) [][]int {
+func FilterOptimalPaths(paths [][]int) [][]int {
 	if len(paths) == 0 {
 		return paths
 	}
