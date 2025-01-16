@@ -5,6 +5,11 @@ import (
 	"strings"
 )
 
+type PathInfo struct {
+	path             []int
+	length, antCount int
+}
+
 func ParseAnts(lines []string) int {
 	if len(lines) == 0 {
 		return 0
@@ -20,33 +25,73 @@ func ParseAnts(lines []string) int {
 }
 
 func Path(routes [][]int, numberOfAnts int) {
-	antPositions := make([]int, numberOfAnts+1)
-	antsFinished := 0
+	if len(routes) == 0 || numberOfAnts <= 0 {
+		return
+	}
 
-	// Iterate turn by turn
-	for i := 0; antsFinished < numberOfAnts; i++ {
-		var moves []string
+	pathInfos := calculateOptimalDistribution(routes, numberOfAnts)
+
+	type AntState struct {
+		pathIndex, position int
+		isFinished          bool
+	}
+
+	antStates := make([]AntState, numberOfAnts)
+	currentAnt := 1
+	var antsFinished int
+
+	// Assign initial paths to ants
+	for i := range pathInfos {
+		for j := 0; j < pathInfos[i].antCount; j++ {
+			if currentAnt <= numberOfAnts {
+				antStates[currentAnt] = AntState{
+					pathIndex:  i,
+					position:   -1,
+					isFinished: false,
+				}
+				currentAnt++
+			}
+		}
+	}
+
+	// Process moves turn by turn
+	for antsFinished < numberOfAnts {
+		moves := make([]string, 0)
+		occupiedRooms := make(map[int]bool)
 
 		for ant := 1; ant <= numberOfAnts; ant++ {
-			if antPositions[ant] == -1 {
-				continue // Ant is already at ##end
+			if antStates[ant].isFinished {
+				continue
 			}
 
-			for _, route := range routes {
-				currentPosition := antPositions[ant]
+			state := &antStates[ant]
+			path := pathInfos[state.pathIndex].path
 
-				if currentPosition < len(route)-1 { // Ant has not finished the path
-					nextRoom := route[currentPosition+1]
+			// Check if ant can start if it hasn't started yet
+			if state.position == -1 {
+				nextRoom := path[1]
 
-					if !isRoomOccupied(antPositions, nextRoom) || nextRoom == route[len(route)-1] {
-						antPositions[ant]++
-						moves = append(moves, fmt.Sprintf("L%d-%d", ant, nextRoom))
+				if !occupiedRooms[nextRoom] {
+					state.position = 1
+					occupiedRooms[nextRoom] = true
+					moves = append(moves, fmt.Sprintf("L%d-%d", ant, nextRoom))
+				}
+				continue
+			}
 
-						if nextRoom == route[len(route)-1] {
-							antPositions[ant] = -1 // Marks ant as finished
-							antsFinished++
-						}
-						break
+			// Try moving forward if ant is on the path
+			if state.position < len(path)-1 {
+				nextRoom := path[state.position+1]
+
+				if !occupiedRooms[nextRoom] {
+					state.position++
+					occupiedRooms[nextRoom] = true
+					moves = append(moves, fmt.Sprintf("L%d-%d", ant, nextRoom))
+
+					// Check if ant has reached the end
+					if state.position == len(path)-1 {
+						state.isFinished = true
+						antsFinished++
 					}
 				}
 			}
@@ -56,6 +101,15 @@ func Path(routes [][]int, numberOfAnts int) {
 			fmt.Println(strings.Join(moves, " "))
 		}
 	}
+}
+
+func assignRoutes(numberOfAnts int, routes [][]int) map[int][]int {
+	assignedRoutes := make(map[int][]int)
+
+	for i := 1; i <= numberOfAnts; i++ {
+		assignedRoutes[i] = routes[(i-1)%len(routes)]
+	}
+	return assignedRoutes
 }
 
 func isRoomOccupied(antPositions []int, room int) bool {
