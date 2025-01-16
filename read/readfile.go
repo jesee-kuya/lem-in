@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// ReadFile reads a file and returns the contents of the file 
+// ReadFile reads a file and returns the contents of the file
 func ReadFile(filePath string) (string, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
