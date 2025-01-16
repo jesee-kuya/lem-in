@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"lem-in/colony"
 	"lem-in/read"
@@ -20,6 +21,16 @@ func main() {
 		fmt.Println("Error reading file:", err)
 		return
 	}
+	fmt.Println(input)
+
+	// Parse number of ants
+	lines := strings.Split(input, "\n")
+	numberOfAnts := colony.ParseAnts(lines)
+
+	if numberOfAnts == 0 {
+		fmt.Println("Invalid number of ants")
+		return
+	}
 
 	// Find all routes
 	routes, err := colony.Route(input)
@@ -27,9 +38,6 @@ func main() {
 		fmt.Println("Error finding paths:", err)
 		return
 	}
-
-	fmt.Println("Routes:")
-	for _, route := range routes {
-		fmt.Println(route)
-	}
+	fmt.Println()
+	colony.Path(routes, numberOfAnts)
 }
