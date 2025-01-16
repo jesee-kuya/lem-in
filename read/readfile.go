@@ -6,15 +6,14 @@ import (
 	"strings"
 )
 
+// ReadFile reads a file and returns the contents of the file 
 func ReadFile(filePath string) (string, error) {
-	// Open file in the filepath
 	file, err := os.Open(filePath)
 	if err != nil {
 		return "Error opening file", err
 	}
 	defer file.Close()
 
-	// read file contents
 	scanner := bufio.NewScanner(file)
 	var contents []string
 	for scanner.Scan() {
