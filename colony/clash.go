@@ -25,6 +25,30 @@ func Clash(paths [][]int) [][]int {
 	return result
 }
 
+func filterAndSortPaths(paths [][]int) [][]int {
+	if len(paths) == 0 {
+		return paths
+	}
+
+	filtered := make([][]int, 0)
+
+	for _, path := range paths {
+		if isValidPath(path) {
+			filtered = append(filtered, path)
+		}
+	}
+
+	// Sort paths by length.
+	for i := 0; i < len(filtered)-1; i++ {
+		for j := i + 1; j < len(filtered); j++ {
+			if len(filtered[i]) > len(filtered[j]) {
+				filtered[i], filtered[j] = filtered[j], filtered[i]
+			}
+		}
+	}
+	return filtered
+}
+
 // containsNode checks if a node exists in a path.
 func containsNode(path []int, node int) bool {
 	for _, n := range path {
