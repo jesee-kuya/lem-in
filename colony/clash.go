@@ -49,6 +49,23 @@ func filterAndSortPaths(paths [][]int) [][]int {
 	return filtered
 }
 
+func isValidPath(path []int) bool {
+	if len(path) < 2 {
+		return false
+	}
+
+	// Check for duplicates
+	visited := make(map[int]bool)
+
+	for _, node := range path {
+		if visited[node] {
+			return false
+		}
+		visited[node] = true
+	}
+	return true
+}
+
 // containsNode checks if a node exists in a path.
 func containsNode(path []int, node int) bool {
 	for _, n := range path {
