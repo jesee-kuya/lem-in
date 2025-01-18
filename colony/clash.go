@@ -51,3 +51,13 @@ func clashingPaths(definedRoutes [][]int, newRoutes []int) bool {
 	}
 	return false
 }
+
+// containsNode checks if a node exists in a path.
+func containsNode(path []int, node int) bool {
+	for _, n := range path {
+		if n == node {
+			return true
+		}
+	}
+	return false
+}
