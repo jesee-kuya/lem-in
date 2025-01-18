@@ -25,6 +25,35 @@ func Clash(paths [][]int) [][]int {
 	return result
 }
 
+// isCompatiblePath checks if a new path can work with existing paths.
+func isCompatiblePath(existingPaths [][]int, newPath []int) bool {
+	existingNodes := make(map[int]bool)
+	for _, path := range existingPaths {
+		for i := 1; i < len(path)-1; i++ {
+			existingNodes[path[i]] = true
+		}
+	}
+
+	// Count shared nodes between new path and existing paths.
+	sharedNodes := 0
+	for i := 1; i < len(newPath)-1; i++ {
+		if existingNodes[newPath[i]] {
+			sharedNodes++
+		}
+	}
+
+	// Calculate path overlap ratio by excluding start and end nodes.
+	pathLength := len(newPath) - 2 
+	if pathLength == 0 {
+		return false
+	}
+
+	overlapRatio := float64(sharedNodes) / float64(pathLength)
+
+	// If the overlap ratio is too high, paths are incompatible.
+	return overlapRatio <= 0.5
+}
+
 func filterAndSortPaths(paths [][]int) [][]int {
 	if len(paths) == 0 {
 		return paths
