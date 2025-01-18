@@ -5,51 +5,24 @@ func Clash(paths [][]int) [][]int {
 		return paths
 	}
 
-	routes := FilterOptimalPaths(paths)
-	// sort routes by length (Dijkstra's Algorithm)
-	sortRoutes(routes)
+	sortedPaths := filterAndSortPaths(paths)
+	result := [][]int{sortedPaths[0]}
 
-	result := [][]int{routes[0]}
+	// Add each remaining path if it doesn't create conflicts.
+	for i := 0; i < len(sortedPaths); i++ {
+		candidatePath := sortedPaths[i]
 
-	for i := 1; i < len(routes); i++ {
-		if !clashingPaths(result, routes[i]) {
-			result = append(result, routes[i])
+		// Skip paths that are longer than the shortest path
+		if len(candidatePath) > len(sortedPaths[0])*2 {
+			continue
+		}
+
+		// Check if this path can work with existing paths
+		if isCompatiblePath(result, candidatePath) {
+			result = append(result, candidatePath)
 		}
 	}
-
 	return result
-}
-
-func sortRoutes(routes [][]int) {
-	for i := 0; i < len(routes); i++ {
-		for j := i + 1; j < len(routes); j++ {
-			if len(routes[i]) > len(routes[j]) {
-				routes[i], routes[j] = routes[j], routes[i]
-			}
-		}
-	}
-}
-
-// checks for conflicts in paths
-func clashingPaths(definedRoutes [][]int, newRoutes []int) bool {
-	// check for shared intermediate nodes
-	set := make(map[int]bool)
-
-	// add all nodes from route1 to one set (exclude start and end)
-	for i := 1; i < len(newRoutes)-1; i++ {
-		set[newRoutes[i]] = true
-	}
-
-	// check if intermediate nodes from route2 exist in the set
-
-	for _, route := range definedRoutes {
-		for i := 1; i < len(route)-1; i++ {
-			if set[route[i]] {
-				return true
-			}
-		}
-	}
-	return false
 }
 
 // containsNode checks if a node exists in a path.
