@@ -2,6 +2,8 @@ package colony
 
 import (
 	"fmt"
+	"lem-in/read"
+	"os"
 	"strings"
 )
 
@@ -68,11 +70,27 @@ func calculateOptimalDistribution(paths [][]int, numberOfAnts int) []PathInfo {
 	return pathInfos
 }
 
-func Path(routes [][]int, numberOfAnts int) {
-	if len(routes) == 0 || numberOfAnts <= 0 {
-		return
+func Path(routes [][]int) [][]string {
+	if len(routes) == 0 {
+		return nil
 	}
 
+	input, err := read.ReadFile(os.Args[1])
+	if err != nil {
+		fmt.Println("Error reading file:", err)
+		return nil
+	}
+
+	// Parse number of ants
+	lines := strings.Split(input, "\n")
+	numberOfAnts := ParseAnts(lines)
+
+	if numberOfAnts == 0 {
+		fmt.Println("Invalid number of ants")
+		return nil
+	}
+
+	var result [][]string
 	pathInfos := calculateOptimalDistribution(routes, numberOfAnts)
 
 	type AntState struct {
@@ -85,6 +103,7 @@ func Path(routes [][]int, numberOfAnts int) {
 	currentAnt := 1
 	antsFinished := 0
 
+	// Initialize ant states
 	for i := range pathInfos {
 		for j := 0; j < pathInfos[i].antCount; j++ {
 			if currentAnt <= numberOfAnts {
@@ -140,7 +159,8 @@ func Path(routes [][]int, numberOfAnts int) {
 		}
 
 		if len(moves) > 0 {
-			fmt.Println(strings.Join(moves, " "))
+			result = append(result, moves)
 		}
 	}
+	return result
 }
