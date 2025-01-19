@@ -6,52 +6,41 @@ func Clash(paths [][]int) [][]int {
 	}
 
 	sortedPaths := filterAndSortPaths(paths)
-	result := [][]int{sortedPaths[0]}
+	bestCombination := [][]int{sortedPaths[0]}
 
-	// Add each remaining path if it doesn't create conflicts.
-	for i := 0; i < len(sortedPaths); i++ {
+	// Try different combinations of paths.
+	for i := 1; i < len(sortedPaths); i++ {
 		candidatePath := sortedPaths[i]
 
-		// Skip paths that are longer than the shortest path
-		if len(candidatePath) > len(sortedPaths[0])*2 {
+		// Skip if path is too long.
+		if len(candidatePath) > len(sortedPaths[0])+2 {
 			continue
 		}
 
-		// Check if this path can work with existing paths
-		if isCompatiblePath(result, candidatePath) {
-			result = append(result, candidatePath)
+		// Check if this path can be added.
+		if isGoodCombination(bestCombination, candidatePath) {
+			bestCombination = append(bestCombination, candidatePath)
 		}
 	}
-	return result
+	return bestCombination
 }
 
-// isCompatiblePath checks if a new path can work with existing paths.
-func isCompatiblePath(existingPaths [][]int, newPath []int) bool {
-	existingNodes := make(map[int]bool)
-	for _, path := range existingPaths {
-		for i := 1; i < len(path)-1; i++ {
-			existingNodes[path[i]] = true
+func isGoodCombination(existingPaths [][]int, newPath []int) bool {
+	// Check if new path shares any intermediate nodes with existing paths.
+	for _, existingPath := range existingPaths {
+		sharedNodes := 0
+		for i := 1; i < len(newPath)-1; i++ {
+			for j := 1; j < len(existingPath)-1; j++ {
+				if newPath[i] == existingPath[j] {
+					sharedNodes++
+					if sharedNodes > 1 {
+						return false
+					}
+				}
+			}
 		}
 	}
-
-	// Count shared nodes between new path and existing paths.
-	sharedNodes := 0
-	for i := 1; i < len(newPath)-1; i++ {
-		if existingNodes[newPath[i]] {
-			sharedNodes++
-		}
-	}
-
-	// Calculate path overlap ratio by excluding start and end nodes.
-	pathLength := len(newPath) - 2 
-	if pathLength == 0 {
-		return false
-	}
-
-	overlapRatio := float64(sharedNodes) / float64(pathLength)
-
-	// If the overlap ratio is too high, paths are incompatible.
-	return overlapRatio <= 0.5
+	return true
 }
 
 func filterAndSortPaths(paths [][]int) [][]int {
@@ -67,15 +56,30 @@ func filterAndSortPaths(paths [][]int) [][]int {
 		}
 	}
 
-	// Sort paths by length.
+	// Sort paths primarily by length.
 	for i := 0; i < len(filtered)-1; i++ {
 		for j := i + 1; j < len(filtered); j++ {
-			if len(filtered[i]) > len(filtered[j]) {
+			if shouldSwapPaths(filtered[i], filtered[j]) {
 				filtered[i], filtered[j] = filtered[j], filtered[i]
 			}
 		}
 	}
 	return filtered
+}
+
+func shouldSwapPaths(path1, path2 []int) bool {
+	// Primary sort by length.
+	if len(path1) != len(path2) {
+		return len(path1) > len(path2)
+	}
+
+	// Secondary sort by path values for consistent ordering.
+	for i := 0; i < len(path1) && i < len(path2); i++ {
+		if path1[i] != path2[i] {
+			return path1[i] > path2[i]
+		}
+	}
+	return false
 }
 
 func isValidPath(path []int) bool {
@@ -93,14 +97,4 @@ func isValidPath(path []int) bool {
 		visited[node] = true
 	}
 	return true
-}
-
-// containsNode checks if a node exists in a path.
-func containsNode(path []int, node int) bool {
-	for _, n := range path {
-		if n == node {
-			return true
-		}
-	}
-	return false
 }
