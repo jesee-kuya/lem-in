@@ -11,15 +11,35 @@ func Clash(paths [][]int) [][]int {
 	// Try different combinations of paths.
 	for i := 1; i < len(sortedPaths); i++ {
 		candidatePath := sortedPaths[i]
+		isCompatible := true
 
-		// Skip if path is too long.
-		if len(candidatePath) > len(sortedPaths[0])+2 {
-			continue
+		// Check compatibility with all current best paths.
+		for _, existingPath := range bestCombination {
+			if !isGoodCombination([][]int{existingPath}, candidatePath) {
+				isCompatible = false
+				break
+			}
 		}
 
-		// Check if this path can be added.
-		if isGoodCombination(bestCombination, candidatePath) {
-			bestCombination = append(bestCombination, candidatePath)
+		// Add path only if it's compatible with all existing paths.
+		if isCompatible {
+			if len(bestCombination) > 1 {
+				// If we already have multiple paths, only keep the better combination.
+				if len(candidatePath) < len(bestCombination[len(bestCombination)-1]) {
+					bestCombination[len(bestCombination)-1] = candidatePath
+				}
+			} else {
+				bestCombination = append(bestCombination, candidatePath)
+			}
+		}
+	}
+
+	// Sort the final combination to match expected order.
+	for i := 0; i < len(bestCombination)-1; i++ {
+		for j := i + 1; j < len(bestCombination); j++ {
+			if len(bestCombination[i]) > len(bestCombination[j]) {
+				bestCombination[i], bestCombination[j] = bestCombination[j], bestCombination[i]
+			}
 		}
 	}
 	return bestCombination
