@@ -43,8 +43,14 @@ func main() {
 	}
 	fmt.Println()
 
+	routes = colony.Clash(routes)
+
 	// Parse number of ants
 	lines := strings.Split(input, "\n")
 	numberOfAnts := ParseAnts(lines)
-	fmt.Println(colony.Path(routes, numberOfAnts))
+	paths := colony.Path(routes, numberOfAnts)
+
+	for i := 0; i < len(paths); i++ {
+		fmt.Println(paths[i])
+	}
 }
