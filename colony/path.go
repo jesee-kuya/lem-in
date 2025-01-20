@@ -10,8 +10,6 @@ type PathInfo struct {
 	antCount int
 }
 
-
-
 // calculateOptimalDistribution determines how many ants should take each path
 func calculateOptimalDistribution(paths [][]int, numberOfAnts int) []PathInfo {
 	if len(paths) == 0 || numberOfAnts <= 0 {
@@ -60,7 +58,7 @@ func Path(routes [][]int, numberOfAnts int) [][]string {
 		return nil
 	}
 
-	if numberOfAnts == 0 {
+	if numberOfAnts <= 0 {
 		fmt.Println("Invalid number of ants")
 		return nil
 	}
@@ -74,11 +72,11 @@ func Path(routes [][]int, numberOfAnts int) [][]string {
 		isFinished bool
 	}
 
+	// Initialize ant states
 	antStates := make([]AntState, numberOfAnts+1)
-	currentAnt := 1
+	currentAnt := 0
 	antsFinished := 0
 
-	// Initialize ant states
 	for i := range pathInfos {
 		for j := 0; j < pathInfos[i].antCount; j++ {
 			if currentAnt <= numberOfAnts {
@@ -119,7 +117,7 @@ func Path(routes [][]int, numberOfAnts int) [][]string {
 			// If ant is on the path, try to move forward
 			if state.position < len(path)-1 {
 				nextRoom := path[state.position+1]
-				if !occupiedRooms[nextRoom] {
+				if !occupiedRooms[nextRoom] || nextRoom == path[len(path)-1] {
 					state.position++
 					occupiedRooms[nextRoom] = true
 					moves = append(moves, fmt.Sprintf("L%d-%d", ant, nextRoom))
