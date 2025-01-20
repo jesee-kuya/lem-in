@@ -1,12 +1,12 @@
 package colony
 
-func Clash(paths [][]int) [][]int {
+func Clash(paths [][]any) [][]any {
 	if len(paths) <= 1 {
 		return paths
 	}
 
 	sortedPaths := filterAndSortPaths(paths)
-	bestCombination := [][]int{sortedPaths[0]}
+	bestCombination := [][]any{sortedPaths[0]}
 
 	// Try different combinations of paths.
 	for i := 1; i < len(sortedPaths); i++ {
@@ -15,7 +15,7 @@ func Clash(paths [][]int) [][]int {
 
 		// Check compatibility with all current best paths.
 		for _, existingPath := range bestCombination {
-			if !isGoodCombination([][]int{existingPath}, candidatePath) {
+			if !isGoodCombination([][]any{existingPath}, candidatePath) {
 				isCompatible = false
 				break
 			}
@@ -45,7 +45,7 @@ func Clash(paths [][]int) [][]int {
 	return bestCombination
 }
 
-func isGoodCombination(existingPaths [][]int, newPath []int) bool {
+func isGoodCombination(existingPaths [][]any, newPath []any) bool {
 	// Check if new path shares any intermediate nodes with existing paths.
 	for _, existingPath := range existingPaths {
 		sharedNodes := 0
@@ -63,12 +63,12 @@ func isGoodCombination(existingPaths [][]int, newPath []int) bool {
 	return true
 }
 
-func filterAndSortPaths(paths [][]int) [][]int {
+func filterAndSortPaths(paths [][]any) [][]any {
 	if len(paths) == 0 {
 		return paths
 	}
 
-	filtered := make([][]int, 0)
+	filtered := make([][]any, 0)
 
 	for _, path := range paths {
 		if isValidPath(path) {
@@ -87,7 +87,7 @@ func filterAndSortPaths(paths [][]int) [][]int {
 	return filtered
 }
 
-func shouldSwapPaths(path1, path2 []int) bool {
+func shouldSwapPaths(path1, path2 []any) bool {
 	// Primary sort by length.
 	if len(path1) != len(path2) {
 		return len(path1) > len(path2)
@@ -96,19 +96,20 @@ func shouldSwapPaths(path1, path2 []int) bool {
 	// Secondary sort by path values for consistent ordering.
 	for i := 0; i < len(path1) && i < len(path2); i++ {
 		if path1[i] != path2[i] {
-			return path1[i] > path2[i]
+			// return path1[i] > path2[i]
+			return true
 		}
 	}
 	return false
 }
 
-func isValidPath(path []int) bool {
+func isValidPath(path []any) bool {
 	if len(path) < 2 {
 		return false
 	}
 
 	// Check for duplicates
-	visited := make(map[int]bool)
+	visited := make(map[any]bool)
 
 	for _, node := range path {
 		if visited[node] {

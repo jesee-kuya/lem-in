@@ -6,11 +6,11 @@ import (
 )
 
 var (
-	arr4       = [][]int{{1, 3, 4, 0}, {1, 2, 5, 6, 0}}
+	arr4       = [][]any{{1, 3, 4, 0}, {1, 2, 5, 6, 0}}
 	TestCases2 = []struct {
 		name         string
 		numberOfAnts int
-		arr          [][]int
+		arr          [][]any
 		res          [][]string
 	}{
 		{"Test1", 3, arr4, [][]string{{"L1-3", "L2-2"}, {"L1-4", "L2-5", "L3-3"}, {"L1-0", "L2-6", "L3-4"}, {"L2-0", "L3-0"}}},

@@ -3,18 +3,18 @@ package colony
 import (
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 )
 
 // Graph represents the ant colony.
-type Graph map[int][]int
+type Graph map[any][]any
 
 // parseGraph converts input into an adjacency list representation.
-func parseGraph(input string) (Graph, int, int, error) {
+func parseGraph(input string) (Graph, any, any, error) {
 	lines := strings.Split(input, "\n")
 	graph := make(Graph)
-	startRoom, endRoom := -1, -1
+	var startRoom, endRoom any
+	startRoom, endRoom = -1, -1
 	isStart, isEnd := false, false
 
 	for _, line := range lines {
@@ -43,12 +43,8 @@ func parseGraph(input string) (Graph, int, int, error) {
 				return nil, -1, -1, fmt.Errorf("invalid tunnel format: %s", line)
 			}
 
-			from, err1 := strconv.Atoi(parts[0])
-			to, err2 := strconv.Atoi(parts[1])
-
-			if err1 != nil || err2 != nil {
-				return nil, -1, -1, fmt.Errorf("invalid room numbers in tunnel: %s", line)
-			}
+			from := parts[0]
+			to := parts[1]
 
 			graph[from] = append(graph[from], to)
 			graph[to] = append(graph[to], from)
@@ -56,10 +52,7 @@ func parseGraph(input string) (Graph, int, int, error) {
 		default:
 			parts := strings.Split(line, " ")
 			if len(parts) == 3 {
-				room, err := strconv.Atoi(parts[0])
-				if err != nil {
-					continue
-				}
+				room := parts[0]
 
 				if isStart {
 					startRoom = room
@@ -80,7 +73,7 @@ func parseGraph(input string) (Graph, int, int, error) {
 }
 
 // Route finds all routes between start and end.
-func Route(input string) ([][]int, error) {
+func Route(input string) ([][]any, error) {
 	graph, start, end, err := parseGraph(input)
 	if err != nil {
 		return nil, err
@@ -90,9 +83,9 @@ func Route(input string) ([][]int, error) {
 		return nil, errors.New("invalid start or end room")
 	}
 
-	var paths [][]int
-	visited := make(map[int]bool)
-	currentPath := []int{start}
+	var paths [][]any
+	visited := make(map[any]bool)
+	currentPath := []any{start}
 	visited[start] = true
 
 	FindPaths(graph, start, end, visited, currentPath, &paths)
@@ -104,9 +97,9 @@ func Route(input string) ([][]int, error) {
 	return FilterOptimalPaths(paths), nil
 }
 
-func FindPaths(graph Graph, current, end int, visited map[int]bool, currentPath []int, paths *[][]int) {
+func FindPaths(graph Graph, current, end any, visited map[any]bool, currentPath []any, paths *[][]any) {
 	if current == end {
-		pathCopy := make([]int, len(currentPath))
+		pathCopy := make([]any, len(currentPath))
 		copy(pathCopy, currentPath)
 		*paths = append(*paths, pathCopy)
 		return
@@ -125,13 +118,13 @@ func FindPaths(graph Graph, current, end int, visited map[int]bool, currentPath 
 	}
 }
 
-func FilterOptimalPaths(paths [][]int) [][]int {
+func FilterOptimalPaths(paths [][]any) [][]any {
 	if len(paths) == 0 {
 		return paths
 	}
 
 	// Create a map to store unique paths
-	uniquePaths := make(map[string][]int)
+	uniquePaths := make(map[string][]any)
 
 	// Filter paths that don't lead to cycles or unnecessary detours
 	for _, path := range paths {
@@ -162,7 +155,7 @@ func FilterOptimalPaths(paths [][]int) [][]int {
 	}
 
 	// Convert back to slice
-	result := make([][]int, 0, len(uniquePaths))
+	result := make([][]any, 0, len(uniquePaths))
 	for _, path := range uniquePaths {
 		result = append(result, path)
 	}
