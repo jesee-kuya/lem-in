@@ -53,10 +53,10 @@ func isGoodCombination(existingPaths [][]int, newPath []int) bool {
 			for j := 1; j < len(existingPath)-1; j++ {
 				if newPath[i] == existingPath[j] {
 					sharedNodes++
-					if sharedNodes > 1 {
-						return false
-					}
 				}
+			}
+			if sharedNodes != 0 {
+				return false
 			}
 		}
 	}
