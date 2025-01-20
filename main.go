@@ -3,10 +3,25 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"lem-in/colony"
 	"lem-in/read"
 )
+
+func ParseAnts(lines []string) int {
+	if len(lines) == 0 {
+		return 0
+	}
+
+	var ants int
+	_, err := fmt.Sscanf(lines[0], "%d", &ants)
+	if err != nil {
+		fmt.Println("Error parsing number of ants:", err)
+		return 0
+	}
+	return ants
+}
 
 func main() {
 	if len(os.Args) != 2 {
@@ -27,5 +42,9 @@ func main() {
 		return
 	}
 	fmt.Println()
-	fmt.Println(colony.Path(routes))
+
+	// Parse number of ants
+	lines := strings.Split(input, "\n")
+	numberOfAnts := ParseAnts(lines)
+	fmt.Println(colony.Path(routes, numberOfAnts))
 }
