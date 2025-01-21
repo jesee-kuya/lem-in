@@ -50,7 +50,7 @@ func main() {
 	numberOfAnts := ParseAnts(lines)
 	paths := colony.Path(routes, numberOfAnts)
 
-	for i := 0; i < len(paths); i++ {
-		fmt.Println(paths[i])
+	for _, path := range paths {
+		fmt.Println(strings.Join(path, " "))
 	}
 }
