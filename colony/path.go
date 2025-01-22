@@ -115,18 +115,24 @@ func Path(routes [][]any, numberOfAnts int) [][]string {
 			}
 
 			// If ant is on the path, try to move forward
-			if state.position < len(path)-1 {
-				nextRoom := path[state.position+1]
-				if !occupiedRooms[nextRoom] || nextRoom == path[len(path)-1] {
-					state.position++
-					occupiedRooms[nextRoom] = true
-					moves = append(moves, fmt.Sprintf("L%v-%v", ant, nextRoom))
+			if state.position <= len(path)-1 {
+				if state.position == len(path)-1 {
+					state.isFinished = true
+					antsFinished++
+				} else {
+					nextRoom := path[state.position+1]
+					if !occupiedRooms[nextRoom] || nextRoom == path[len(path)-1] {
+						state.position++
+						occupiedRooms[nextRoom] = true
+						moves = append(moves, fmt.Sprintf("L%v-%v", ant, nextRoom))
 
-					// Check if ant has reached the end
-					if state.position == len(path)-1 {
-						state.isFinished = true
-						antsFinished++
+						// Check if ant has reached the end
+						if state.position == len(path)-1 {
+							state.isFinished = true
+							antsFinished++
+						}
 					}
+
 				}
 			}
 		}
