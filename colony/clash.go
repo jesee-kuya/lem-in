@@ -1,11 +1,19 @@
 package colony
 
+import (
+	"fmt"
+	"reflect"
+	"sort"
+)
+
 func Clash(paths [][]any) [][]any {
 	if len(paths) <= 1 {
 		return paths
 	}
 
-	sortedPaths := filterAndSortPaths(paths)
+	// Filter and sort paths at the start.
+	sPaths := filterAndSortPaths(paths)
+	sortedPaths := Unique(sPaths)
 	bestCombination := [][]any{sortedPaths[0]}
 
 	// Try different combinations of paths.
@@ -23,40 +31,31 @@ func Clash(paths [][]any) [][]any {
 
 		// Add path only if it's compatible with all existing paths.
 		if isCompatible {
-			if len(bestCombination) > 1 {
+			if len(bestCombination) > 1 && len(candidatePath) < len(bestCombination[len(bestCombination)-1]) {
 				// If we already have multiple paths, only keep the better combination.
-				if len(candidatePath) < len(bestCombination[len(bestCombination)-1]) {
-					bestCombination[len(bestCombination)-1] = candidatePath
-				}
+				bestCombination[len(bestCombination)-1] = candidatePath
 			} else {
 				bestCombination = append(bestCombination, candidatePath)
 			}
 		}
 	}
 
-	// Sort the final combination to match expected order.
-	for i := 0; i < len(bestCombination)-1; i++ {
-		for j := i + 1; j < len(bestCombination); j++ {
-			if len(bestCombination[i]) > len(bestCombination[j]) {
-				bestCombination[i], bestCombination[j] = bestCombination[j], bestCombination[i]
-			}
-		}
-	}
+	// Sort the final combination by path length.
+	sort.Slice(bestCombination, func(i, j int) bool {
+		return len(bestCombination[i]) < len(bestCombination[j])
+	})
+
 	return bestCombination
 }
 
 func isGoodCombination(existingPaths [][]any, newPath []any) bool {
 	// Check if new path shares any intermediate nodes with existing paths.
 	for _, existingPath := range existingPaths {
-		sharedNodes := 0
 		for i := 1; i < len(newPath)-1; i++ {
 			for j := 1; j < len(existingPath)-1; j++ {
 				if newPath[i] == existingPath[j] {
-					sharedNodes++
+					return false
 				}
-			}
-			if sharedNodes != 0 {
-				return false
 			}
 		}
 	}
@@ -64,53 +63,37 @@ func isGoodCombination(existingPaths [][]any, newPath []any) bool {
 }
 
 func filterAndSortPaths(paths [][]any) [][]any {
-	if len(paths) == 0 {
-		return paths
-	}
-
-	filtered := make([][]any, 0)
-
+	// Filter valid paths
+	filtered := make([][]any, 0, len(paths))
 	for _, path := range paths {
 		if isValidPath(path) {
 			filtered = append(filtered, path)
 		}
 	}
 
-	// Sort paths primarily by length.
-	for i := 0; i < len(filtered)-1; i++ {
-		for j := i + 1; j < len(filtered); j++ {
-			if shouldSwapPaths(filtered[i], filtered[j]) {
-				filtered[i], filtered[j] = filtered[j], filtered[i]
+	// Sort paths by length and lexicographically if equal length.
+	sort.Slice(filtered, func(i, j int) bool {
+		if len(filtered[i]) != len(filtered[j]) {
+			return len(filtered[i]) < len(filtered[j])
+		}
+		for k := 0; k < len(filtered[i]) && k < len(filtered[j]); k++ {
+			if filtered[i][k] != filtered[j][k] {
+				return filtered[i][k].(string) < filtered[j][k].(string)
 			}
 		}
-	}
+		return false
+	})
+
 	return filtered
 }
 
-func shouldSwapPaths(path1, path2 []any) bool {
-	// Primary sort by length.
-	if len(path1) != len(path2) {
-		return len(path1) > len(path2)
-	}
-
-	// Secondary sort by path values for consistent ordering.
-	for i := 0; i < len(path1) && i < len(path2); i++ {
-		if path1[i] != path2[i] {
-			// return path1[i] > path2[i]
-			return true
-		}
-	}
-	return false
-}
-
 func isValidPath(path []any) bool {
+	// Path should have at least 2 elements and no duplicates.
 	if len(path) < 2 {
 		return false
 	}
 
-	// Check for duplicates
 	visited := make(map[any]bool)
-
 	for _, node := range path {
 		if visited[node] {
 			return false
@@ -118,4 +101,70 @@ func isValidPath(path []any) bool {
 		visited[node] = true
 	}
 	return true
+}
+
+func Unique(sortedPaths [][]any) [][]any {
+	unique := [][]any{}
+	seen := make(map[string]bool)
+
+	for _, path := range sortedPaths {
+		// Serialize each path as a string to ensure uniqueness.
+		pathKey := serializePath(path)
+		if !seen[pathKey] {
+			seen[pathKey] = true
+			unique = append(unique, path)
+		}
+	}
+
+	// Call UniqueElements to remove any further unwanted duplicates if necessary
+	return UniqueElements(unique)
+}
+
+func UniqueElements(holder [][]any) [][]any {
+	uniquePaths := make([][]any, 0, len(holder))
+
+	for _, path := range holder {
+		if !containsPath(uniquePaths, path) {
+			uniquePaths = append(uniquePaths, path)
+		}
+	}
+
+	// If no unique paths found, return the shortest paths
+	if len(uniquePaths) == 0 {
+		minLength := shortest(holder)
+		for _, path := range holder {
+			if len(path) == minLength {
+				uniquePaths = append(uniquePaths, path)
+			}
+		}
+	}
+
+	return uniquePaths
+}
+
+func containsPath(paths [][]any, path []any) bool {
+	// Check if the path is already in the list of paths (deep comparison).
+	for _, p := range paths {
+		if reflect.DeepEqual(p, path) {
+			return true
+		}
+	}
+	return false
+}
+
+func serializePath(path []any) string {
+	// Convert a path to a string for easy comparison.
+	// You can adjust this for more complex structures, like JSON or another serialization format.
+	return fmt.Sprintf("%v", path)
+}
+
+func shortest(holder [][]any) int {
+	// Find the shortest path in terms of length.
+	minLength := len(holder[0])
+	for _, path := range holder {
+		if len(path) < minLength {
+			minLength = len(path)
+		}
+	}
+	return minLength
 }
