@@ -34,14 +34,12 @@ func main() {
 		fmt.Println("Error reading file:", err)
 		return
 	}
-	fmt.Println(input)
 
 	routes, err := colony.Route(input)
 	if err != nil {
-		fmt.Println("Error finding paths:", err)
+		fmt.Println("ERROR:", err)
 		return
 	}
-	fmt.Println()
 
 	routes = colony.Clash(routes)
 
@@ -49,6 +47,11 @@ func main() {
 	lines := strings.Split(input, "\n")
 	numberOfAnts := ParseAnts(lines)
 	paths := colony.Path(routes, numberOfAnts)
+	if len(paths) == 0 {
+		return
+	}
+	fmt.Println(input)
+	fmt.Println()
 
 	for _, path := range paths {
 		fmt.Println(strings.Join(path, " "))
