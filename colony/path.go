@@ -146,6 +146,5 @@ func Path(routes [][]any, numberOfAnts int) [][]string {
 			result = append(result, moves)
 		}
 	}
-	fmt.Println("Result", result)
 	return result
 }
