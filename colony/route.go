@@ -3,6 +3,8 @@ package colony
 import (
 	"errors"
 	"fmt"
+	"reflect"
+	"strconv"
 	"strings"
 )
 
@@ -11,6 +13,7 @@ type Graph map[any][]any
 
 // parseGraph converts input into an adjacency list representation.
 func parseGraph(input string) (Graph, any, any, error) {
+	rooms, _ := CheckRooms(input)
 	lines := strings.Split(input, "\n")
 	graph := make(Graph)
 	var startRoom, endRoom any
@@ -45,6 +48,25 @@ func parseGraph(input string) (Graph, any, any, error) {
 
 			from := parts[0]
 			to := parts[1]
+			checkTo := false
+			checkFrom := false
+
+			// Check for undefined rooms
+			for i := 0; i < len(rooms); i++ {
+				if rooms[i] == to {
+					checkTo = true
+				}
+				if rooms[i] == from {
+					checkFrom = true
+				}
+			}
+			if !checkFrom || !checkTo {
+				return nil, -1, -1, fmt.Errorf("undefined room: %s", line)
+			}
+
+			if from == to || from == "" || to == "" {
+				return nil, -1, -1, fmt.Errorf("invalid tunnel format: %s", line)
+			}
 
 			graph[from] = append(graph[from], to)
 			graph[to] = append(graph[to], from)
@@ -76,6 +98,10 @@ var Res = [][]string{{"L1-t L2-h L3-0"}, {"L1-E L2-A L3-o L4-t L5-h L6-0"}, {"L1
 
 // Route finds all routes between start and end.
 func Route(input string) ([][]any, error) {
+	_, check := CheckRooms(input)
+	if !check {
+		return nil, errors.New("invalid co-ordinates")
+	}
 	graph, start, end, err := parseGraph(input)
 	if err != nil {
 		return nil, err
@@ -163,4 +189,67 @@ func FilterOptimalPaths(paths [][]any) [][]any {
 	}
 
 	return result
+}
+
+func CheckRooms(input string) ([]any, bool) {
+	var room []any
+	var coordinates [][]int
+	lines := strings.Split(input, "\n")
+	for i := 1; i < len(lines); i++ {
+		if !strings.HasPrefix(lines[i], "#") {
+			tester := strings.Fields(lines[i])
+			check, cord := CheckCoordinates(tester)
+			coordinates = append(coordinates, cord)
+			if check {
+				room = append(room, tester[0])
+			} else {
+				return nil, false
+			}
+
+		}
+	}
+	if !RepeatingCordinates(coordinates) {
+		return nil, false
+	}
+	return room, true
+}
+
+func CheckCoordinates(tester []string) (bool, []int) {
+	var coodinates []int
+	if len(tester) != 3 {
+		if len(tester) == 1 && strings.Contains(tester[0], "-") {
+			return true, nil
+		}
+		return false, nil
+	}
+	if len(tester) == 1 && strings.Contains(tester[0], "-") {
+		return true, nil
+	}
+
+	num1, err := strconv.Atoi(tester[1])
+	num2, err1 := strconv.Atoi(tester[2])
+	if err1 != nil || err != nil {
+		return false, nil
+	}
+	coodinates = append(coodinates, num1, num2)
+	return true, coodinates
+}
+
+func RepeatingCordinates(coordinates [][]int) bool {
+	for i := 0; i < len(coordinates); i++ {
+		if len(coordinates[i]) == 0 {
+			continue
+		}
+		for j := 0; j < len(coordinates); j++ {
+			if len(coordinates[j]) == 0 {
+				continue
+			}
+			if j != i {
+				if reflect.DeepEqual(coordinates[i], coordinates[j]) {
+					return false
+				}
+			}
+		}
+	}
+	return true
 }
