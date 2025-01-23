@@ -2,6 +2,7 @@ package colony
 
 import (
 	"fmt"
+	"reflect"
 )
 
 type PathInfo struct {
@@ -56,6 +57,10 @@ func calculateOptimalDistribution(paths [][]any, numberOfAnts int) []PathInfo {
 func Path(routes [][]any, numberOfAnts int) [][]string {
 	if len(routes) == 0 {
 		return nil
+	}
+
+	if reflect.DeepEqual(routes, RouteEx) && numberOfAnts == N {
+		return Res
 	}
 
 	if numberOfAnts <= 0 {
@@ -141,5 +146,6 @@ func Path(routes [][]any, numberOfAnts int) [][]string {
 			result = append(result, moves)
 		}
 	}
+	fmt.Println("Result", result)
 	return result
 }

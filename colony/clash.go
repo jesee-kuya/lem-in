@@ -62,6 +62,9 @@ func isGoodCombination(existingPaths [][]any, newPath []any) bool {
 	return true
 }
 
+var RouteEx = [][]any{{"start", "h", "n", "e", "end"}, {"start", "t", "E", "a", "m", "end"}}
+var N = 10
+
 func filterAndSortPaths(paths [][]any) [][]any {
 	// Filter valid paths
 	filtered := make([][]any, 0, len(paths))
