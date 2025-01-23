@@ -59,7 +59,7 @@ func Path(routes [][]any, numberOfAnts int) [][]string {
 	}
 
 	if numberOfAnts <= 0 {
-		fmt.Println("Invalid number of ants")
+		fmt.Println("Error: Invalid number of ants")
 		return nil
 	}
 
