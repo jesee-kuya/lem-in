@@ -141,7 +141,6 @@ func Path(routes [][]any, numberOfAnts int) [][]string {
 
 		if !moveMade {
 			// If no moves are possible, exit to prevent an infinite loop
-			fmt.Println("No moves possible; exiting.")
 			break
 		}
 
