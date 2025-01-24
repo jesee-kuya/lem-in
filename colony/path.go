@@ -64,7 +64,7 @@ func Path(routes [][]any, numberOfAnts int) [][]string {
 	}
 
 	if numberOfAnts <= 0 {
-		fmt.Println("Error: Invalid number of ants")
+		fmt.Println("Error invalid data format: Invalid number of ants")
 		return nil
 	}
 
@@ -97,8 +97,8 @@ func Path(routes [][]any, numberOfAnts int) [][]string {
 	// Process moves turn by turn
 	for antsFinished < numberOfAnts {
 		moves := make([]string, 0)
-		occupiedRooms := make(map[any]int) // Tracks ant position in each room
-		moveMade := false                  // Tracks if any ant made a move during this turn
+		occupiedRooms := make(map[any]int)
+		moveMade := false
 
 		for ant := 1; ant <= numberOfAnts; ant++ {
 			if antStates[ant].isFinished {
@@ -111,7 +111,7 @@ func Path(routes [][]any, numberOfAnts int) [][]string {
 			// If ant hasn't started yet, check if it can start
 			if state.position == -1 {
 				nextRoom := path[1]
-				if occupiedRooms[nextRoom] == 0 { // Room is unoccupied
+				if occupiedRooms[nextRoom] == 0 {
 					state.position = 1
 					occupiedRooms[nextRoom] = ant
 					moves = append(moves, fmt.Sprintf("L%v-%v", ant, nextRoom))
@@ -124,7 +124,7 @@ func Path(routes [][]any, numberOfAnts int) [][]string {
 			if state.position < len(path)-1 {
 				nextRoom := path[state.position+1]
 				if occupiedRooms[nextRoom] == 0 || nextRoom == path[len(path)-1] {
-					occupiedRooms[path[state.position]] = 0 // Free current room
+					occupiedRooms[path[state.position]] = 0
 					state.position++
 					occupiedRooms[nextRoom] = ant
 					moves = append(moves, fmt.Sprintf("L%v-%v", ant, nextRoom))
