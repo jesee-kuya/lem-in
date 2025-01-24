@@ -37,7 +37,7 @@ func main() {
 
 	routes, err := colony.Route(input)
 	if err != nil {
-		fmt.Println("ERROR:", err)
+		fmt.Println("ERROR: invalid data format,", err)
 		return
 	}
 
