@@ -9,6 +9,21 @@ import (
 	"lem-in/read"
 )
 
+func FormatInput(input string) string {
+	lines := strings.Split(input, "\n")
+
+	for i := 0; i < len(lines); i++ {
+		if strings.Contains(lines[i], "-") {
+			if i != len(lines)-1 {
+				if !strings.Contains(lines[i+1], "-") {
+					lines[i], lines[i+1] = lines[i+1], lines[i]
+				}
+			}
+		}
+	}
+	return strings.Join(lines, "\n")
+}
+
 func ParseAnts(lines []string) int {
 	if len(lines) == 0 {
 		return 0
@@ -50,6 +65,7 @@ func main() {
 	if len(paths) == 0 {
 		return
 	}
+	input = FormatInput(input)
 	fmt.Println(input)
 	fmt.Println()
 
