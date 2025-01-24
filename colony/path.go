@@ -79,26 +79,26 @@ func Path(routes [][]any, numberOfAnts int) [][]string {
 
 	// Initialize ant states
 	antStates := make([]AntState, numberOfAnts+1)
-	currentAnt := 0
+	currentAnt := 1
 	antsFinished := 0
 
-	for i := range pathInfos {
-		for j := 0; j < pathInfos[i].antCount; j++ {
-			if currentAnt <= numberOfAnts {
-				antStates[currentAnt] = AntState{
-					pathIndex:  i,
-					position:   -1,
-					isFinished: false,
-				}
-				currentAnt++
+	// Assign ants to paths, ensuring no two ants start on the same path in the first turn
+	for i := 0; i < len(pathInfos) && currentAnt <= numberOfAnts; i++ {
+		for j := 0; j < pathInfos[i].antCount && currentAnt <= numberOfAnts; j++ {
+			antStates[currentAnt] = AntState{
+				pathIndex:  i,
+				position:   -1,
+				isFinished: false,
 			}
+			currentAnt++
 		}
 	}
 
 	// Process moves turn by turn
 	for antsFinished < numberOfAnts {
 		moves := make([]string, 0)
-		occupiedRooms := make(map[any]bool)
+		occupiedRooms := make(map[any]int) // Tracks ant position in each room
+		moveMade := false                  // Tracks if any ant made a move during this turn
 
 		for ant := 1; ant <= numberOfAnts; ant++ {
 			if antStates[ant].isFinished {
@@ -111,35 +111,38 @@ func Path(routes [][]any, numberOfAnts int) [][]string {
 			// If ant hasn't started yet, check if it can start
 			if state.position == -1 {
 				nextRoom := path[1]
-				if !occupiedRooms[nextRoom] {
+				if occupiedRooms[nextRoom] == 0 { // Room is unoccupied
 					state.position = 1
-					occupiedRooms[nextRoom] = true
+					occupiedRooms[nextRoom] = ant
 					moves = append(moves, fmt.Sprintf("L%v-%v", ant, nextRoom))
+					moveMade = true
 				}
 				continue
 			}
 
 			// If ant is on the path, try to move forward
-			if state.position <= len(path)-1 {
-				if state.position == len(path)-1 {
-					state.isFinished = true
-					antsFinished++
-				} else {
-					nextRoom := path[state.position+1]
-					if !occupiedRooms[nextRoom] || nextRoom == path[len(path)-1] {
-						state.position++
-						occupiedRooms[nextRoom] = true
-						moves = append(moves, fmt.Sprintf("L%v-%v", ant, nextRoom))
+			if state.position < len(path)-1 {
+				nextRoom := path[state.position+1]
+				if occupiedRooms[nextRoom] == 0 || nextRoom == path[len(path)-1] {
+					occupiedRooms[path[state.position]] = 0 // Free current room
+					state.position++
+					occupiedRooms[nextRoom] = ant
+					moves = append(moves, fmt.Sprintf("L%v-%v", ant, nextRoom))
+					moveMade = true
 
-						// Check if ant has reached the end
-						if state.position == len(path)-1 {
-							state.isFinished = true
-							antsFinished++
-						}
+					// Check if ant has reached the end
+					if state.position == len(path)-1 {
+						state.isFinished = true
+						antsFinished++
 					}
-
 				}
 			}
+		}
+
+		if !moveMade {
+			// If no moves are possible, exit to prevent an infinite loop
+			fmt.Println("No moves possible; exiting.")
+			break
 		}
 
 		if len(moves) > 0 {
